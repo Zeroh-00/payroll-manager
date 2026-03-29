@@ -45,7 +45,8 @@ button{
 padding:6px 10px;
 border:none;
 border-radius:6px;
-margin:2px
+margin:2px;
+cursor:pointer
 }
 
 .present{
@@ -58,23 +59,55 @@ background:#ef4444;
 color:white
 }
 
+.dashboard{
+display:flex;
+gap:20px;
+flex-wrap:wrap
+}
+
+.box{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+flex:1
+}
+
 </style>
 
 </head>
 
 <body>
 
-<h2>Payroll Manager</h2>
+<h2>Cloud Payroll Manager</h2>
+
+<div class="dashboard">
+
+<div class="box">
+<h3>Total Workers</h3>
+<div id="totalWorkers">0</div>
+</div>
+
+<div class="box">
+<h3>Total Payroll</h3>
+<div id="totalPayroll">0</div>
+</div>
+
+<div class="box">
+<h3>Total Advances</h3>
+<div id="totalAdvance">0</div>
+</div>
+
+</div>
 
 <div class="card">
 
 <h3>Add Worker</h3>
 
 <input id="name" placeholder="Worker Name">
-
 <input id="wage" placeholder="Daily Wage">
 
-<button onclick="addWorker()">Add</button>
+<button onclick="addWorker()">Add Worker</button>
 
 </div>
 
@@ -87,24 +120,45 @@ color:white
 <tr>
 <th>Name</th>
 <th>Wage</th>
+<th>Attendance</th>
 </tr>
 
 </table>
 
 </div>
 
+<div class="card">
+
+<h3>Add Adjustment</h3>
+
+<select id="workerSelect"></select>
+
+<select id="type">
+<option>Bonus</option>
+<option>Advance</option>
+</select>
+
+<input id="amount" placeholder="Amount">
+
+<button onclick="addAdjustment()">Save</button>
+
+</div>
+
 <script>
 
-// paste firebase config here
+/* ---------------- Firebase Config ---------------- */
+
 const firebaseConfig = {
-  apiKey: "YOURKEY",
-  authDomain: "YOURDOMAIN",
-  projectId: "YOURPROJECT"
+  apiKey: "PASTE_KEY_HERE",
+  authDomain: "PROJECT.firebaseapp.com",
+  projectId: "PROJECT_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
+
+/* ---------------- Add Worker ---------------- */
 
 function addWorker(){
 
@@ -118,11 +172,51 @@ wage:wage
 
 }
 
+/* ---------------- Attendance Button ---------------- */
+
+function attendanceButton(worker){
+
+let btn=document.createElement("button")
+btn.innerText="Present"
+
+btn.onclick=function(){
+
+db.collection("attendance").add({
+worker:worker,
+date:new Date()
+})
+
+}
+
+return btn
+
+}
+
+/* ---------------- Add Adjustment ---------------- */
+
+function addAdjustment(){
+
+let worker=document.getElementById("workerSelect").value
+let type=document.getElementById("type").value
+let amount=parseFloat(document.getElementById("amount").value)
+
+db.collection("adjustments").add({
+worker:worker,
+type:type,
+amount:amount
+})
+
+}
+
+/* ---------------- Load Workers ---------------- */
+
 db.collection("workers").onSnapshot(snapshot=>{
 
 let table=document.getElementById("workers")
 
-table.innerHTML="<tr><th>Name</th><th>Wage</th></tr>"
+table.innerHTML="<tr><th>Name</th><th>Wage</th><th>Attendance</th></tr>"
+
+document.getElementById("workerSelect").innerHTML=""
 
 snapshot.forEach(doc=>{
 
@@ -133,12 +227,23 @@ let row=table.insertRow()
 row.insertCell().innerText=w.name
 row.insertCell().innerText=w.wage
 
+let cell=row.insertCell()
+
+cell.appendChild(attendanceButton(w.name))
+
+let opt=document.createElement("option")
+opt.text=w.name
+
+workerSelect.appendChild(opt)
+
 })
+
+document.getElementById("totalWorkers").innerText=snapshot.size
 
 })
 
 </script>
-<script type="module">
+  <script type="module">
   // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
