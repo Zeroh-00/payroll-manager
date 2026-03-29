@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#eef2f6;
+margin:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+margin-bottom:20px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1)
+}
+
+table{
+border-collapse:collapse;
+width:100%
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+text-align:center
+}
+
+th{
+background:#1f6feb;
+color:white
+}
+
+button{
+padding:6px 10px;
+border:none;
+border-radius:6px;
+margin:2px
+}
+
+.present{
+background:#22c55e;
+color:white
+}
+
+.absent{
+background:#ef4444;
+color:white
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Payroll Manager</h2>
+
+<div class="card">
+
+<h3>Add Worker</h3>
+
+<input id="name" placeholder="Worker Name">
+
+<input id="wage" placeholder="Daily Wage">
+
+<button onclick="addWorker()">Add</button>
+
+</div>
+
+<div class="card">
+
+<h3>Workers</h3>
+
+<table id="workers">
+
+<tr>
+<th>Name</th>
+<th>Wage</th>
+</tr>
+
+</table>
+
+</div>
+
+<script>
+
+// paste firebase config here
+const firebaseConfig = {
+  apiKey: "YOURKEY",
+  authDomain: "YOURDOMAIN",
+  projectId: "YOURPROJECT"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+function addWorker(){
+
+let name=document.getElementById("name").value
+let wage=parseFloat(document.getElementById("wage").value)
+
+db.collection("workers").add({
+name:name,
+wage:wage
+})
+
+}
+
+db.collection("workers").onSnapshot(snapshot=>{
+
+let table=document.getElementById("workers")
+
+table.innerHTML="<tr><th>Name</th><th>Wage</th></tr>"
+
+snapshot.forEach(doc=>{
+
+let w=doc.data()
+
+let row=table.insertRow()
+
+row.insertCell().innerText=w.name
+row.insertCell().innerText=w.wage
+
+})
+
+})
+
+</script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCSIuuA0PazKaAdPzLTuidiradSaTmjru0",
+    authDomain: "payroll-manager-aea20.firebaseapp.com",
+    databaseURL: "https://payroll-manager-aea20-default-rtdb.firebaseio.com",
+    projectId: "payroll-manager-aea20",
+    storageBucket: "payroll-manager-aea20.firebasestorage.app",
+    messagingSenderId: "343022656930",
+    appId: "1:343022656930:web:1ffd3229d6efd69e83e6fb",
+    measurementId: "G-QRPYNY15YE"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
+</body>
+</html>
